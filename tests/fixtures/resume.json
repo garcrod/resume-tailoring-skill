@@ -1,0 +1,24 @@
+{
+  "name": "Alex Example",
+  "company": "Example Labs",
+  "role": "Software Engineer",
+  "contact": [
+    [{ "text": "alex@example.test", "link": "mailto:alex@example.test" }],
+    [{ "text": "Portfolio", "link": "https://example.test/alex" }]
+  ],
+  "format": { "paper": "A4", "font": "Liberation Sans", "bodyPt": 11, "headingPt": 12, "marginInches": 0.75, "preferredPages": 1 },
+  "sections": [
+    { "heading": "Professional Summary", "blocks": [
+      { "type": "paragraph", "runs": [{ "text": "Engineer building reliable deployment tools." }] }
+    ] },
+    { "heading": "Professional Experience", "blocks": [
+      { "type": "heading", "runs": [{ "text": "Software Engineer" }] },
+      { "type": "paragraph", "keepWithNext": true, "runs": [{ "text": "Example Labs | 2022-2025", "bold": true }] },
+      { "type": "bullet", "runs": [{ "text": "Built CI/CD tools for 3 synthetic projects." }] },
+      { "type": "bullet", "runs": [{ "text": "Reduced test runtime by 20% in the example workload.", "italic": true }] }
+    ] },
+    { "heading": "Education", "blocks": [
+      { "type": "paragraph", "runs": [{ "text": "BSc Computer Science | Example University (2022)" }] }
+    ] }
+  ]
+}

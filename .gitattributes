@@ -1,0 +1,4 @@
+# Generated assets must remain byte-stable on Windows checkouts.
+skills/resume-tailoring/scripts/generate-resume.cjs text eol=lf
+skills/resume-tailoring/THIRD-PARTY-NOTICES.txt text eol=lf
+*.md whitespace=trailing-space,space-before-tab,cr-at-eol

@@ -1,5 +1,9 @@
 # Multi-Job Resume Tailoring - Implementation Summary
 
+> Historical Claude-era design record, not current installation instructions.
+> Runtime files now live under `skills/resume-tailoring/`, including schemas
+> under `references/schemas/`. See the repository README for Copilot setup.
+
 **Status:** Design and Documentation Complete
 **Date:** 2025-11-04
 **Implementation Plan:** 2025-11-04-multi-job-resume-tailoring-implementation.md

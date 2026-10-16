@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "resume-tailoring",
+  "description": "Truth-preserving resume tailoring with research, branching discovery, batch workflows, and local document output for GitHub Copilot CLI.",
+  "version": "2.0.0",
+  "author": { "name": "Varun R" },
+  "repository": "https://github.com/garcrod/resume-tailoring-skill",
+  "license": "MIT",
+  "keywords": ["copilot", "resume", "career", "docx", "pdf"]
+}

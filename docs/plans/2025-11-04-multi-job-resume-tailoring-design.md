@@ -1,5 +1,8 @@
 # Multi-Job Resume Tailoring - Design Document
 
+> Historical Claude-era design record. Runtime instructions and schemas now
+> live under `skills/resume-tailoring/`; see the README for Copilot setup.
+
 **Date:** 2025-11-04
 **Purpose:** Extend the resume-tailoring skill to handle multiple job applications efficiently while maintaining research depth and quality
 

@@ -1,0 +1,37 @@
+{
+  "weights": { "direct": 0.4, "transferable": 0.3, "adjacent": 0.2, "impact": 0.1 },
+  "bands": { "direct": 90, "transferable": 75, "adjacent": 60, "weak": 45 },
+  "singleJobPhases": [
+    "Phase 0: Library Initialization",
+    "Phase 1: Research Phase",
+    "Phase 2: Template Generation",
+    "Phase 2.5: Experience Discovery (OPTIONAL)",
+    "Phase 3: Assembly Phase",
+    "Phase 4: Generation Phase",
+    "Phase 5: Library Update (CONDITIONAL)"
+  ],
+  "checkpoints": [
+    "Wait for user confirmation before proceeding.",
+    "Wait for user approval before proceeding.",
+    "Wait for user approval before generation."
+  ],
+  "batchFeatures": [
+    "Phase 0: Job Intake & Batch Initialization",
+    "Phase 1: Aggregate Gap Analysis",
+    "Phase 2: Shared Experience Discovery",
+    "Phase 3: Per-Job Processing",
+    "Phase 4: Batch Finalization",
+    "Incremental Batch Support",
+    "interactive",
+    "express",
+    "archive (not deleted)",
+    "Auto-Save Behavior"
+  ],
+  "syntheticScenarios": [
+    { "id": "single", "company": "Example Labs", "role": "Engineer", "resumes": 2, "discovery": "skip", "libraryDecision": "save without adding" },
+    { "id": "batch", "jobs": ["Example Labs", "Sample Cloud", "Demo Systems"], "sharedGap": "CI/CD", "mode": "interactive", "switchToExpress": true },
+    { "id": "resume", "completed": ["job-1"], "inProgress": "job-2", "phase": "matching", "templateApproved": true },
+    { "id": "incremental", "existing": ["job-1", "job-2", "job-3"], "add": ["job-4"], "askOnlyNewGaps": true },
+    { "id": "partial-output", "pdfRequested": true, "converterAvailable": false, "expected": ["markdown", "docx", "report"], "pdfStatus": "failed" }
+  ]
+}

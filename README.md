@@ -1,444 +1,236 @@
-# Resume Tailoring Skill
+# Resume Tailoring for GitHub Copilot CLI
 
-> AI-powered resume generation that researches roles, surfaces undocumented experiences, and creates tailored resumes from your existing resume library.
+Tailor resumes from your existing Markdown resume library without inventing
+experience. The skill preserves the original research, branching interviews,
+transparent matching, approval checkpoints, batch workflows, and library updates.
+Local tooling produces Markdown, editable DOCX, and optional PDF.
 
-**Mission:** Your ability to get a job should be based on your experiences and capabilities, not on your resume writing skills.
+## Requirements
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+- GitHub Copilot CLI with skills/plugins enabled and a Copilot account.
+- An existing Markdown resume library, normally `resumes` in your workspace.
+- Node.js 22 or newer for the bundled document generator.
+- LibreOffice for **optional PDF export**. Word and additional document skills
+  are not required.
 
-## Table of Contents
+Plugin and standalone discovery have been checked with Copilot CLI `1.0.99-2`;
+older releases are not asserted compatible with the manifest format.
 
-- [Overview](#overview)
-- [Installation](#installation)
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Key Features](#key-features)
-- [Architecture](#architecture)
-- [Usage Examples](#usage-examples)
-- [Contributing](#contributing)
-- [License](#license)
+The document commands target Windows, macOS, and Linux. CI is configured for all three;
+see [validation evidence and manual scenarios](docs/testing/copilot-smoke-tests.md)
+for what has actually been exercised. Fonts and LibreOffice versions can change
+pagination, so review rendered pages before submission.
 
-## Overview
+## Install
 
-This Claude Code skill generates high-quality, tailored resumes optimized for specific job descriptions while maintaining factual integrity. It goes beyond simple keyword matching by:
+### Plugin (recommended)
 
-- **Multi-Job Batch Processing:** Process 3-5 similar jobs efficiently with shared experience discovery (NEW!)
-- **Deep Research:** Analyzes company culture, role requirements, and success profiles
-- **Experience Discovery:** Surfaces undocumented experiences through conversational branching interviews
-- **Smart Matching:** Uses confidence-scored content selection with transparent gap identification
-- **Multi-Format Output:** Generates professional MD, DOCX, PDF, and interview prep reports
-- **Self-Improving:** Library grows with each successful resume
+From a terminal:
 
-## Installation
-
-### Option 1: Install from GitHub (Recommended)
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/varunr89/resume-tailoring-skill.git ~/.claude/skills/resume-tailoring
-   ```
-
-2. **Verify installation:**
-   ```bash
-   ls ~/.claude/skills/resume-tailoring
-   ```
-   You should see: `SKILL.md`, `research-prompts.md`, `matching-strategies.md`, `branching-questions.md`, `README.md`
-
-3. **Restart Claude Code** (if already running)
-
-### Option 2: Manual Installation
-
-1. **Create the skill directory:**
-   ```bash
-   mkdir -p ~/.claude/skills/resume-tailoring
-   ```
-
-2. **Download the files:**
-   - Download all files from this repository
-   - Place them in `~/.claude/skills/resume-tailoring/`
-
-3. **Verify installation:**
-   - Open Claude Code
-   - Type `/skills` to see available skills
-   - `resume-tailoring` should appear in the list
-
-## Prerequisites
-
-**Required:**
-- Claude Code with skills enabled
-- Existing resume library (at least 1-2 resumes in markdown format)
-
-**Optional but Recommended:**
-- WebSearch capability (for company research)
-- `document-skills` plugin (for DOCX/PDF generation)
-- 10+ resumes in your library for best results
-
-**Resume Library Setup:**
-
-Create a `resumes/` directory in your project:
-```bash
-mkdir -p ~/resumes
+```powershell
+copilot plugin install garcrod/resume-tailoring-skill
+copilot plugin list
 ```
 
-Add your existing resumes in markdown format:
-```
-~/resumes/
-├── Resume_Company1_Role1.md
-├── Resume_Company2_Role2.md
-└── Resume_General_2024.md
-```
+Then in a new Copilot CLI session:
 
-## Quick Start
-
-### Single Job Application
-**1. Invoke the skill in Claude Code:**
-```
-"I want to apply for [Role] at [Company]. Here's the JD: [paste job description]"
+```text
+/skills list
+/skills info resume-tailoring
 ```
 
-**2. The skill will automatically:**
-1. Build library from existing resumes
-2. Research company and role
-3. Create optimized template (with checkpoint)
-4. Offer branching experience discovery
-5. Match content with confidence scores (with checkpoint)
-6. Generate MD + DOCX + PDF + Report
-7. Optionally update library
+Direct repository/path installs work in the tested CLI release, but that release
+warns they are deprecated in favor of marketplace installs in a future version.
+No marketplace listing is claimed; see [distribution guidance](SUBMISSION_GUIDE.md).
 
-**3. Review and approve:**
-- Checkpoints at key decision points
-- Full transparency on content matching
-- Option to revise or approve at each stage
+For development, clone the repository and load it without installing or modifying
+your user configuration:
 
-### Multiple Jobs (Batch Mode - NEW!)
-**1. Provide multiple job descriptions:**
-```
-"I want to apply for these 3 roles:
-1. [Company 1] - [Role]: [JD or URL]
-2. [Company 2] - [Role]: [JD or URL]
-3. [Company 3] - [Role]: [JD or URL]"
+```powershell
+git clone https://github.com/garcrod/resume-tailoring-skill.git
+Set-Location resume-tailoring-skill
+copilot --plugin-dir .
 ```
 
-**2. The skill will:**
-1. Detect multi-job intent and offer batch mode
-2. Build library once (shared across all jobs)
-3. Analyze gaps across ALL jobs (deduplicates common requirements)
-4. Conduct single discovery session addressing all gaps
-5. Process each job individually (research + tailoring)
-6. Present all resumes for batch review
+### Standalone skill
 
-**3. Time savings:**
-- Shared discovery session (ask once, not 3-5 times)
-- 11-27% faster than processing jobs sequentially
-- Same quality as single-job mode
+Copy the **whole** `skills/resume-tailoring` directory into either your project's
+`.github/skills` or your personal `$HOME/.copilot/skills` directory.
+Do not copy only `SKILL.md`: references and the bundled generator are required.
 
-## Files
+PowerShell, from this checkout (personal installation):
 
-### Core Implementation
-- `SKILL.md` - Main skill implementation with single-job and multi-job workflows
-- `multi-job-workflow.md` - Complete multi-job batch processing workflow
-- `research-prompts.md` - Company/role research templates
-- `matching-strategies.md` - Content scoring algorithms
-- `branching-questions.md` - Experience discovery patterns
-
-### Documentation
-- `README.md` - This file
-- `MARKETPLACE.md` - Marketplace listing information
-- `SUBMISSION_GUIDE.md` - Skill submission guidelines
-
-### Supporting Documentation (`docs/`)
-- `docs/schemas/` - Data structure schemas for batch processing
-  - `batch-state-schema.md` - Batch state tracking structure
-  - `job-schema.md` - Job object schema
-- `docs/plans/` - Design documents and implementation plans
-  - `2025-11-04-multi-job-resume-tailoring-design.md` - Multi-job feature design
-  - `2025-11-04-multi-job-implementation-summary.md` - Implementation summary
-- `docs/testing/` - Testing checklists
-  - `multi-job-test-checklist.md` - Comprehensive multi-job test cases
-
-## Key Features
-
-**🚀 Multi-Job Batch Processing (NEW!)**
-- Process 3-5 similar jobs efficiently
-- Shared experience discovery (ask once, apply to all)
-- Aggregate gap analysis with deduplication
-- Time savings: 11-27% faster than sequential processing
-- Incremental batches (add more jobs later)
-
-**🔍 Deep Research**
-- Company culture and values
-- Role benchmarking via LinkedIn
-- Success profile synthesis
-
-**💬 Branching Discovery**
-- Conversational experience surfacing
-- Dynamic follow-up questions
-- Surfaces undocumented work
-- Multi-job context awareness
-
-**🎯 Smart Matching**
-- Confidence-scored content selection
-- Transparent gap identification
-- Truth-preserving reframing
-
-**📄 Multi-Format Output**
-- Professional markdown
-- ATS-friendly DOCX
-- Print-ready PDF
-- Interview prep report
-
-**🔄 Self-Improving**
-- Library grows with each resume
-- Successful patterns reused
-- New experiences captured
-
-## Architecture
-
-### Single-Job Workflow
-```
-Phase 0: Library Build (always first)
-   ↓
-Phase 1: Research (JD + Company + Role)
-   ↓
-Phase 2: Template (Structure + Titles)
-   ↓  [CHECKPOINT]
-Phase 2.5: Experience Discovery (Optional, Branching)
-   ↓
-Phase 3: Assembly (Matching + Scoring)
-   ↓  [CHECKPOINT]
-Phase 4: Generation (MD + DOCX + PDF + Report)
-   ↓  [USER REVIEW]
-Phase 5: Library Update (Conditional)
+```powershell
+$dest = Join-Path $HOME '.copilot\skills\resume-tailoring'
+if (Test-Path $dest) { throw "Destination exists: $dest. Review or back it up first." }
+New-Item -ItemType Directory -Force (Split-Path $dest) | Out-Null
+Copy-Item -Recurse '.\skills\resume-tailoring' $dest
 ```
 
-### Multi-Job Workflow (NEW!)
-```
-Phase 0: Intake & Batch Initialization
-   ↓
-Phase 1: Aggregate Gap Analysis (deduplicates across all jobs)
-   ↓
-Phase 2: Shared Experience Discovery (ask once, apply to all)
-   ↓
-Phase 3: Per-Job Processing (research + template + matching + generation for each)
-   ↓
-Phase 4: Batch Finalization (review all resumes, update library)
-```
+For project installation, use `.github\skills\resume-tailoring` in the project
+where you keep your resume workspace as the destination. On macOS/Linux use
+the equivalent native paths and copy the complete directory.
 
-**Time Savings:**
-- 3 jobs: ~40 min vs ~45 min sequential (11% savings)
-- 5 jobs: ~55 min vs ~75 min sequential (27% savings)
+Run `/skills reload`, then `/skills info resume-tailoring` in the session.
+The root `skills` directory is a plugin component, not a default standalone
+project discovery location.
 
-See `multi-job-workflow.md` for complete details.
+Avoid installing the same skill through both methods. Importing a single
+`SKILL.md` using `copilot skill add` does not include its supporting files;
+directory registration is a different operation, not a full-package copy.
 
-## Design Philosophy
+## Document dependencies
 
-**Truth-Preserving Optimization:**
-- NEVER fabricate experience
-- Intelligently reframe and emphasize
-- Transparent about gaps
+Install a supported Node.js LTS release from [nodejs.org](https://nodejs.org/).
+Check `node --version`. End users do not need npm dependencies: the checked-in
+generator includes its JavaScript dependencies and third-party license notices.
+No files are written into installed plugin assets.
 
-**Holistic Person Focus:**
-- Surface undocumented experiences
-- Value volunteer work, side projects
-- Build around complete background
+For PDF, install [LibreOffice](https://www.libreoffice.org/download/download-libreoffice/):
 
-**User Control:**
-- Checkpoints at key decisions
-- Options, not mandates
-- Can adjust or go back
+| System | Typical setup | Discovery |
+|---|---|---|
+| Windows | `winget install --id TheDocumentFoundation.LibreOffice --exact` | PATH or Program Files |
+| macOS | `brew install --cask libreoffice` | PATH or Applications |
+| Linux (Debian/Ubuntu) | `sudo apt-get install libreoffice-writer fonts-liberation` | PATH or standard binary locations |
 
-## Usage Examples
+These are manual setup examples, not automatic installation hooks. Other Linux
+distributions use their own package managers. For nonstandard installs pass
+`--libreoffice` with the executable's full path.
 
-### Example 1: Internal Role Transfer
+Install the font used by your resume or agree on an available alternative such
+as Liberation Sans. Default styling remains Calibri 11pt body/12pt headings.
+Paper size and margins are explicit; missing fonts may cause substitution.
 
-```
-USER: "I want to apply for Principal PM role in 1ES team at Microsoft.
-      Here's the JD: [paste]"
+## Use
 
-RESULT:
-- Found 29 existing resumes
-- Researched Microsoft 1ES team culture
-- Featured PM2 Azure Eng Systems experience
-- Discovered: VS Code extension, AI side projects
-- 92% JD coverage, 75% direct matches
-- Generated tailored resume + interview prep report
+Keep source resumes in a workspace separate from installed skill files:
+
+```text
+resume-workspace/
+  resumes/
+    Resume_General.md
+    Resume_Previous_Role.md
 ```
 
-### Example 2: Career Transition
+Start Copilot in that workspace and prompt:
 
-```
-USER: "I'm a TPM transitioning to ecology PM. JD: [paste]"
-
-RESULT:
-- Reframed "Technical Program Manager" → "Program Manager, Environmental Systems"
-- Surfaced volunteer conservation work
-- Identified graduate research in environmental modeling
-- 65% JD coverage with clear gap analysis
-- Cover letter recommendations provided
+```text
+Use /resume-tailoring to apply for Engineer at Example Labs.
+My resume library is in the resumes directory. Here is the job description: ...
+Create Markdown and DOCX; also export PDF.
 ```
 
-### Example 3: Career Gap Handling
+If the library is outside the workspace, approve directory access when prompted
+or add it with `/add-dir`. Use public company/role information for research;
+private resumes need not be included in search queries.
 
-```
-USER: "I have a 2-year gap from starting a company. JD: [paste]"
+For multiple jobs:
 
-RESULT:
-- Included startup as legitimate role
-- Surfaced: fundraising, product development, team building
-- Framed gap as entrepreneurial experience
-- Generated resume showing initiative and diverse skills
+```text
+Use /resume-tailoring for these three roles: ...
 ```
 
-### Example 4: Multi-Job Batch (NEW!)
+The skill offers opt-in batch mode, builds the library once, deduplicates gaps,
+conducts shared discovery, then tailors each job sequentially. Interactive mode
+is the default; express mode skips only per-job research/template/mapping
+checkpoints after you choose it. Final review and library updates still require
+your approval. To resume: `Resume batch <batch_id>`. Previously saved state and
+phase artifacts, not session memory alone, determine where to continue.
 
-```
-USER: "I want to apply for these 3 TPM roles:
-      1. Microsoft 1ES Principal PM
-      2. Google Cloud Senior TPM
-      3. AWS Container Services Senior PM"
+## Workflow and unchanged tailoring logic
 
-RESULT:
-- Detected multi-job mode, user confirmed
-- Built library once (29 resumes)
-- Gap analysis: 14 total gaps, 8 unique after deduplication
-- Shared discovery: 30-min session surfaced 5 new experiences
-  * Kubernetes CI/CD for nonprofits
-  * Azure migration for university lab
-  * Cross-functional leadership examples
-- Processed 3 jobs: 85%, 88%, 78% JD coverage
-- Time: 40 minutes vs 45 minutes sequential (11% savings)
-- All 3 resumes + batch summary generated
-```
+Single job: library initialization, company/role research, approved template,
+optional experience discovery, approved content mapping, generation, final review,
+then optional library update.
 
-### Example 5: Incremental Batch Addition (NEW!)
+Matching remains direct 40%, transferable 30%, adjacent 20%, impact 10%.
+Confidence bands remain direct 90-100%, transferable 75-89%, adjacent 60-74%;
+below 60% invokes the original gap-handling options. These are transparent
+workflow assessments, not statistical guarantees of hiring success.
 
-```
-WEEK 1: User processes 3 jobs (Microsoft, Google, AWS) in 40 minutes
+Batch mode preserves shared gap analysis/discovery, per-job research, incremental
+additions, selective review, revisions, archive-not-delete removal, pause/resume,
+and user-controlled library enrichment. Small-batch guidance is not a new hard
+limit. Cover-letter writing and LinkedIn profile optimization remain out of scope.
 
-WEEK 2:
-USER: "I found 2 more jobs at Stripe and Meta. Add them to my batch?"
+See [the skill](skills/resume-tailoring/SKILL.md),
+[matching](skills/resume-tailoring/matching-strategies.md),
+[discovery](skills/resume-tailoring/branching-questions.md), and
+[batch workflow](skills/resume-tailoring/multi-job-workflow.md).
 
-RESULT:
-- Loaded existing batch with 5 previously discovered experiences
-- Incremental gap analysis: only 3 new gaps (vs 14 original)
-- Quick 10-min discovery session for new gaps only
-- Processed 2 additional jobs: 82%, 76% coverage
-- Time: 20 minutes (vs 30 if starting from scratch)
-- Total: 5 jobs, 8 experiences discovered
-```
+## Outputs and recovery
 
-## Usage Patterns
+Normal delivered files are `{Name}_{Company}_{Role}_Resume.md`, `.docx`, and
+`_Report.md`. PDF is opt-in. The report includes coverage, source provenance,
+reframing/gaps, and interview-preparation recommendations.
+Batch files remain under `resumes/batches/<batch_id>/job-<N>-<company>/`.
+Internal presentation models/state are not source resumes.
 
-**Internal role (same company):**
-- Features most relevant internal experience
-- Uses internal terminology
-- Leverages organizational knowledge
+The bundled generator renders MD/DOCX from one approved content model, then
+exports that DOCX to PDF through LibreOffice. It never changes scores or
+rewrites facts. It protects existing files unless replacement is explicitly
+approved. PDF page count is measured; excessive length is returned to you for
+the original pruning/acceptance decision.
 
-**External role (new company):**
-- Deep company research
-- Cultural fit emphasis
-- Risk mitigation
+On failure, Copilot explains what is missing and preserves successful artifacts:
+missing LibreOffice does not prevent DOCX; failed DOCX does not discard Markdown.
+No failed format is shown as generated. Library updates still require approval.
+Unavailable web research falls back explicitly to JD-only analysis.
 
-**Career transition:**
-- Title reframing
-- Transferable skill emphasis
-- Bridge domain gaps
+See [the document model and CLI](skills/resume-tailoring/references/document-generation.md)
+for generator arguments, JSON statuses, error codes, page preferences, and
+nonstandard LibreOffice paths.
 
-**With career gaps:**
-- Gaps as valuable experience
-- Alternative activities highlighted
-- Truthful, positive framing
+## Update and remove
 
-## Testing
-
-### Single-Job Tests
-See Testing Guidelines section in SKILL.md (lines 1244-1320)
-
-**Key test scenarios:**
-- Happy path (full workflow)
-- Minimal library (2 resumes)
-- Research failures (obscure company)
-- Experience discovery value
-- Title reframing accuracy
-- Multi-format generation
-
-### Multi-Job Tests (NEW!)
-See `docs/testing/multi-job-test-checklist.md` for comprehensive test cases
-
-**Key multi-job scenarios:**
-- Happy path (3 similar jobs)
-- Diverse jobs (low overlap detection)
-- Incremental batch addition
-- Pause/resume functionality
-- Individual vs batch review
-- Express mode processing
-- Error handling and graceful degradation
-
-**Run tests:**
-```bash
-cd ~/.claude/skills/resume-tailoring
-# Single-job: Follow test procedures in SKILL.md Testing Guidelines section
-# Multi-job: Follow docs/testing/multi-job-test-checklist.md
+```powershell
+copilot plugin update resume-tailoring
+copilot plugin uninstall resume-tailoring
 ```
 
-## Contributing
+For standalone copies, back up local changes before replacing the entire skill
+folder; reload afterward. Installed plugins may be cached; source-checkout edits
+are not automatically reflected in a previously installed copy. Use a fresh
+`--plugin-dir` session for local development.
 
-Contributions are welcome! Please follow these guidelines:
+## Development
 
-1. **Fork the repository**
-2. **Create a feature branch:** `git checkout -b feature/amazing-feature`
-3. **Make your changes:**
-   - Update `SKILL.md` for implementation changes
-   - Add tests if applicable
-   - Update README if architecture changes
-4. **Commit with descriptive messages:** `git commit -m "feat: add amazing feature"`
-5. **Push to your fork:** `git push origin feature/amazing-feature`
-6. **Open a Pull Request**
+```powershell
+npm ci
+npm run build
+npm test
+npm run build:check
+```
 
-**Before submitting:**
-- Run regression tests (see Testing section in SKILL.md)
-- Ensure all phases work end-to-end
-- Update documentation
+The build bundles the renderer and dependency licenses into the skill directory.
+Commit regenerated assets with source changes; no global npm install is needed.
+`npm run build:check` rejects stale artifacts.
 
-## Troubleshooting
+`npm test` includes packaging, unchanged matching/discovery fingerprints, workflow
+contracts, DOCX XML/text, standalone execution, and conversion failures.
+Real PDF integration is skipped locally if LibreOffice is missing; use
+`REQUIRE_PDF_TESTS=1` to require it, and `LIBREOFFICE_PATH` for an explicit binary.
+`npm run test:pdf` requires real LibreOffice and fails instead of skipping if it
+is unavailable.
+CI requires real PDF tests on every supported OS.
+If native PDF-test dependencies fail to load, check that `npm config get os`
+matches the host (or is unset), then perform a clean install. A forced Linux npm
+configuration on Windows installs the wrong native packages; do not change
+global settings just for this repository.
+See [manual workflow checks](docs/testing/multi-job-test-checklist.md).
 
-**Skill not appearing:**
-- Verify files are in `~/.claude/skills/resume-tailoring/`
-- Restart Claude Code
-- Check SKILL.md has valid YAML frontmatter
+## Privacy and attribution
 
-**Research phase failing:**
-- Check WebSearch capability is enabled
-- Skill will gracefully fall back to JD-only analysis
+Document generation/conversion runs locally; the generator does not upload
+resumes. Content provided to Copilot is processed according to your Copilot
+service configuration and policies. Optional web research sends queries to its
+configured service. Do not commit real resumes or personal data in test fixtures.
 
-**DOCX/PDF generation failing:**
-- Ensure `document-skills` plugin is installed
-- Skill will fall back to markdown-only output
-
-**Low match confidence:**
-- Try the Experience Discovery phase
-- Consider adding more resumes to your library
-- Review gap handling recommendations
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built for Claude Code skills framework
-- Designed with truth-preserving optimization principles
-- Inspired by the belief that job opportunities should be based on capabilities, not resume writing skills
-
-## Support
-
-- **Issues:** [GitHub Issues](https://github.com/varunr89/resume-tailoring-skill/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/varunr89/resume-tailoring-skill/discussions)
-
-## Roadmap
-
-- [ ] Cover letter generation integration
-- [ ] LinkedIn profile optimization
-- [ ] Interview preparation Q&A generation
-- [ ] Multi-language resume support
-- [ ] Custom industry templates
+Originally created by Varun Ramesh:
+[upstream](https://github.com/varunr89/resume-tailoring-skill).
+This fork targets GitHub Copilot CLI. Historical design documents describe the
+original Claude-era workflow, not current setup instructions.
+Licensed under [MIT](LICENSE); bundled dependencies have their own
+[notices](skills/resume-tailoring/THIRD-PARTY-NOTICES.txt).
+Report issues at [this repository](https://github.com/garcrod/resume-tailoring-skill/issues).

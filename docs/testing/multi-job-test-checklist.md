@@ -4,6 +4,18 @@
 
 Manual testing checklist for validating multi-job workflow functionality.
 
+Run these cases in GitHub Copilot CLI with the complete `resume-tailoring`
+skill installed. See [Copilot smoke tests](copilot-smoke-tests.md) for setup and
+evidence requirements. Runtime instructions now live in
+`skills/resume-tailoring/multi-job-workflow.md`; schemas are bundled in
+`skills/resume-tailoring/references/schemas/`.
+
+Legacy timing and coverage numbers below are illustrative scenario targets, not
+promises for arbitrary jobs. Never inflate scores or invent facts to meet them.
+PDF remains optional. Use real generator statuses, not assumed file counts;
+DOCX/PDF failures must be disclosed while successful artifacts are preserved.
+These are manual test procedures, not a claim they have all been executed.
+
 ## Pre-Test Setup
 
 - [ ] Resume library with at least 10 resumes in `resumes/` directory

@@ -18,3 +18,11 @@ test-outputs/
 
 # Git worktrees
 .worktrees/
+
+# Document-generator development and synthetic outputs
+node_modules/
+coverage/
+.copilot-test/
+
+#resume folders
+resumes/

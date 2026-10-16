@@ -43,6 +43,11 @@ Use this skill when:
 
 ## Implementation
 
+Run in GitHub Copilot CLI. Read [the runtime contract](references/copilot-runtime.md)
+before starting; it defines tool capability mapping, checkpoint handling, workspace
+paths, research fallback, and saved-state recovery. No personal document skill is
+required. Installed skill assets are read-only.
+
 See supporting files:
 - `research-prompts.md` - Structured prompts for company/role research
 - `matching-strategies.md` - Content matching algorithms and scoring
@@ -167,14 +172,15 @@ When multi-job mode is activated, see `multi-job-workflow.md` for complete workf
 
 2. **Scan for markdown files:**
    ```
-   Use Glob tool: pattern="*.md" path={resume_directory}
+   Use available file discovery tools to find resume Markdown in {resume_directory}.
+   Exclude generated reports, batch artifacts, profiles, templates, and mappings.
    Count files found
    Announce: "Building resume library... found {N} resumes"
    ```
 
 3. **Parse each resume:**
    For each resume file:
-   - Use Read tool to load content
+   - Use the available file-reading tool to load content
    - Extract sections: roles, bullets, skills, education
    - Identify patterns: bullet structure, length, formatting
 
@@ -257,7 +263,7 @@ Extract: requirements, keywords, implicit preferences, red flags, role archetype
 
 **1.2 Company Research:**
 ```
-WebSearch queries:
+Use available web search tools for public company/role queries:
 - "{company} mission values culture"
 - "{company} engineering blog"
 - "{company} recent news"
@@ -267,8 +273,8 @@ Synthesize: mission, values, business model, stage
 
 **1.3 Role Benchmarking:**
 ```
-WebSearch: "site:linkedin.com {job_title} {company}"
-WebFetch: Top 3-5 profiles
+Search: "site:linkedin.com {job_title} {company}"
+Fetch: Top 3-5 publicly accessible profiles; do not bypass login restrictions
 Analyze: common backgrounds, skills, terminology
 
 If sparse results, try similar companies
@@ -687,7 +693,15 @@ Wait for user approval before generation.
 
 **4.1 Markdown Generation:**
 
-**Compile mapped content into clean markdown:**
+**Compile mapped content into the approved presentation model:**
+
+Follow [document-generation.md](references/document-generation.md). Save the
+approved content as internal `_resume_document.json` in the workspace/output
+directory, validated against `references/resume-document.schema.json`.
+The bundled generator renders BOTH Markdown and DOCX from this one model.
+Never rescore, reframe, omit, or invent content during rendering.
+The following illustrates the intended Markdown structure, not a second manually
+maintained source:
 
 ```markdown
 # {User_Name}
@@ -746,10 +760,10 @@ Wait for user approval before generation.
 
 **4.2 DOCX Generation:**
 
-**Use document-skills:docx:**
+**Use the bundled Node.js generator:**
 
 ```
-REQUIRED SUB-SKILL: Use document-skills:docx
+node "<SKILL_BASE>/scripts/generate-resume.cjs" --input "<WORKSPACE>/_resume_document.json" --out-dir "<OUTPUT_DIRECTORY>"
 
 Create Word document with:
 - Professional fonts (Calibri 11pt body, 12pt headers)
@@ -760,11 +774,11 @@ Create Word document with:
 - Bold/italic emphasis (company names, titles, dates)
 - Page breaks if 2-page resume
 
-See docx skill documentation for:
-- Paragraph and TextRun structure
-- Numbering configuration for bullets
-- Heading levels and styles
-- Spacing and margins
+See references/document-generation.md for the approved model and CLI contract.
+Use native separators for the host. Do not install npm packages in plugin assets.
+Read JSON stdout, exit status, and stderr. Only list formats whose status is
+"created"; disclose failures and preserve successful Markdown/report output.
+Never use --overwrite without explicit approval to replace existing files.
 ```
 
 **Output:** `{Name}_{Company}_{Role}_Resume.docx`
@@ -774,11 +788,12 @@ See docx skill documentation for:
 **If user requests PDF:**
 
 ```
-OPTIONAL SUB-SKILL: Use document-skills:pdf
-
-Convert DOCX to PDF OR generate directly
-Ensure formatting preservation
-Professional appearance for direct submission
+Add --pdf to the same generator command. It exports the generated DOCX through
+local LibreOffice. Optionally supply --libreoffice "<executable path>".
+If unavailable, disclose the dependency error and keep MD/DOCX/report.
+Inspect the rendered PDF and actual pageCount, not an estimated page count.
+If the page preference is exceeded (exit 3), ask the existing length question;
+do not silently prune or shrink content. No separate PDF layout is generated.
 ```
 
 **Output:** `{Name}_{Company}_{Role}_Resume.pdf`
@@ -843,6 +858,13 @@ Professional appearance for direct submission
 **Output:** `{Name}_{Company}_{Role}_Resume_Report.md`
 
 **Present to user:**
+
+The file list below is a successful-run example. Build the actual list and
+metrics from created artifacts and the separately written report. On failure,
+show the error and recovery options, not unconditional success. In revisions,
+regenerate all requested formats from the revised approved model; an older PDF
+must never be presented as current. Record report success separately.
+
 ```
 "Your tailored resume has been generated!
 
@@ -900,10 +922,11 @@ Which option?"
    Source: {current_directory}/{Name}_{Company}_{Role}_Resume.md
    Destination: {resume_library}/{Name}_{Company}_{Role}_Resume.md
 
-   Also move:
-   - .docx file
-   - .pdf file (if exists)
-   - _Report.md file
+   Also move only verified current outputs:
+   - .docx file (if successfully generated)
+   - .pdf file (if requested and successfully generated, never a stale prior PDF)
+   - _Report.md file (if successfully written)
+   Do not ingest internal document models or generation-status metadata.
    ```
 
 2. **Rebuild library database:**
@@ -1038,7 +1061,7 @@ Which approach?"
 
 **Edge Case 3: Research Phase Failures**
 ```
-SCENARIO: WebSearch fails, LinkedIn unavailable, company info sparse
+SCENARIO: Available web research tools fail, LinkedIn unavailable, company info sparse
 
 HANDLING:
 "⚠️ Limited company research available.
@@ -1125,7 +1148,8 @@ Your preference?"
 - All checkpoints allow going back to previous phase
 - User can request adjustments at any checkpoint
 - Generation failures (DOCX/PDF) fall back to markdown-only
-- Progress saved between phases (can resume if interrupted)
+- Progress saved between phases in workspace artifacts (can resume if interrupted;
+  see references/copilot-runtime.md, not assumed cross-session memory)
 
 **Graceful Degradation:**
 - Research limited → Fall back to JD-only analysis

@@ -1,0 +1,26 @@
+{
+  "name": "resume-tailoring-skill",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node scripts/build-generator.mjs",
+    "build:check": "node scripts/build-generator.mjs --check",
+    "test": "node --test",
+    "test:pdf": "node scripts/require-pdf.mjs"
+  },
+  "dependencies": {
+    "ajv": "8.17.1",
+    "docx": "9.5.1",
+    "pdf-lib": "1.17.1"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "0.1.100",
+    "esbuild": "0.25.12",
+    "fast-xml-parser": "5.3.8",
+    "fflate": "0.8.2",
+    "pdfjs-dist": "5.4.624"
+  }
+}
